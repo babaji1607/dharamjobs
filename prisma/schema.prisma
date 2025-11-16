@@ -1,0 +1,288 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums
+enum Role {
+  SEEKER
+  EMPLOYER
+  ADMIN
+}
+
+enum OrgType {
+  TEMPLE
+  ASHRAM
+  NGO
+  SCHOOL
+  BUSINESS
+}
+
+enum JobType {
+  FULLTIME
+  PARTTIME
+  VOLUNTEER
+  INTERNSHIP
+}
+
+enum ApplicationStatus {
+  APPLIED
+  VIEWED
+  SHORTLISTED
+  INTERVIEW
+  REJECTED
+  HIRED
+}
+
+enum SpiritualPractice {
+  REGULAR
+  OCCASIONAL
+  NONE
+}
+
+// 1. User - Authentication + base identity
+model User {
+  id           String   @id @default(uuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  phone        String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  profile                Profile?
+  employerProfile        EmployerProfile?
+  applications           Application[]
+  sentMessages           Message[]              @relation("SentMessages")
+  receivedMessages       Message[]              @relation("ReceivedMessages")
+  dharmaValues           UserDharmaValue[]
+  ethicsRatingsGiven     EmployerEthicsRating[]
+  virtueRatingsReceived  CandidateVirtueRating[]
+  bookmarks              Bookmark[]
+  notifications          Notification[]
+  activityLogs           ActivityLog[]
+
+  @@map("users")
+}
+
+// 2. Profile - For Seekers
+model Profile {
+  id                String            @id @default(uuid())
+  userId            String            @unique
+  bio               String?
+  experienceYears   Int?
+  skills            String[]
+  location          String?
+  education         String?
+  resumeUrl         String?
+  preferredRoles    String[]
+  isVegetarian      Boolean           @default(false)
+  isNonSmoker       Boolean           @default(false)
+  spiritualPractice SpiritualPractice @default(NONE)
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("profiles")
+}
+
+// 3. EmployerProfile - For Organisations
+model EmployerProfile {
+  id               String   @id @default(uuid())
+  userId           String   @unique
+  orgName          String
+  orgType          OrgType
+  missionStatement String?
+  location         String?
+  websiteUrl       String?
+  vegetarianOnly   Boolean  @default(false)
+  providesStay     Boolean  @default(false)
+  providesFood     Boolean  @default(false)
+  ethicsScore      Float    @default(0)
+
+  // Relations
+  user          User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  jobs          Job[]
+  ethicsRatings EmployerEthicsRating[]
+
+  @@map("employer_profiles")
+}
+
+// 4. Job
+model Job {
+  id            String   @id @default(uuid())
+  employerId    String
+  title         String
+  description   String
+  requirements  String[]
+  salary        String?
+  location      String
+  jobType       JobType
+  dharmicNeeds  String[]
+  accommodation Boolean  @default(false)
+  foodProvided  Boolean  @default(false)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+
+  // Relations
+  employer       EmployerProfile         @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  applications   Application[]
+  virtueRatings  CandidateVirtueRating[]
+  bookmarks      Bookmark[]
+
+  @@map("jobs")
+}
+
+// 5. Application
+model Application {
+  id               String            @id @default(uuid())
+  jobId            String
+  userId           String
+  status           ApplicationStatus @default(APPLIED)
+  candidateMessage String?
+  adminNotes       String?
+  appliedAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  // Relations
+  job  Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([jobId, userId])
+  @@map("applications")
+}
+
+// 6. Message
+model Message {
+  id         String   @id @default(uuid())
+  senderId   String
+  receiverId String
+  content    String
+  timestamp  DateTime @default(now())
+  isRead     Boolean  @default(false)
+
+  // Relations
+  sender   User @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
+  receiver User @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
+
+  @@map("messages")
+}
+
+// 7. DharmaValue - Master list of dharmic qualities
+model DharmaValue {
+  id          String @id @default(uuid())
+  name        String @unique
+  description String?
+
+  // Relations
+  userValues UserDharmaValue[]
+
+  @@map("dharma_values")
+}
+
+// 8. UserDharmaValue - Mapping table for many-to-many user → dharma values
+model UserDharmaValue {
+  id      String @id @default(uuid())
+  userId  String
+  valueId String
+  level   Int // 1-5 scale
+
+  // Relations
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  value DharmaValue @relation(fields: [valueId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, valueId])
+  @@map("user_dharma_values")
+}
+
+// 9. EmployerEthicsRating - Ratings given to employers by users
+model EmployerEthicsRating {
+  id            String   @id @default(uuid())
+  employerId    String
+  ratedByUserId String
+  satya         Int // 1-5
+  ahimsa        Int // 1-5
+  seva          Int // 1-5
+  discipline    Int // 1-5
+  comment       String?
+  createdAt     DateTime @default(now())
+
+  // Relations
+  employer EmployerProfile @relation(fields: [employerId], references: [id], onDelete: Cascade)
+  ratedBy  User            @relation(fields: [ratedByUserId], references: [id], onDelete: Cascade)
+
+  @@unique([employerId, ratedByUserId])
+  @@map("employer_ethics_ratings")
+}
+
+// 10. CandidateVirtueRating - Employers rate hired candidates
+model CandidateVirtueRating {
+  id               String   @id @default(uuid())
+  candidateId      String
+  jobId            String
+  virtueIntegrity  Int // 1-5
+  virtueDiscipline Int // 1-5
+  virtueSeva       Int // 1-5
+  comment          String?
+  createdAt        DateTime @default(now())
+
+  // Relations
+  candidate User @relation(fields: [candidateId], references: [id], onDelete: Cascade)
+  job       Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([candidateId, jobId])
+  @@map("candidate_virtue_ratings")
+}
+
+// 11. Bookmark
+model Bookmark {
+  id      String   @id @default(uuid())
+  userId  String
+  jobId   String
+  savedAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  job  Job  @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, jobId])
+  @@map("bookmarks")
+}
+
+// 12. Notification
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+// 13. ActivityLog
+model ActivityLog {
+  id        String   @id @default(uuid())
+  userId    String
+  action    String
+  entityId  String?
+  timestamp DateTime @default(now())
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("activity_logs")
+}

@@ -10,9 +10,9 @@ export default function LanguageSwitcher() {
 
     return (
         <div className="flex items-center gap-2">
-            <Languages className="h-5 w-5 text-primary-foreground" />
+            <Languages className="h-5 w-5" />
             <Select value={locale} onValueChange={setLocale}>
-                <SelectTrigger className="w-[140px] bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground">
+                <SelectTrigger className="w-[140px]">
                     <SelectValue />
                 </SelectTrigger>
                 <SelectContent>

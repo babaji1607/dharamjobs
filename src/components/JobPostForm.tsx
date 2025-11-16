@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 import { Job, INDIAN_STATES, VerifiedUser } from "@/types";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 interface JobPostFormProps {
     onSubmit: (job: Omit<Job, "id" | "postedDate">) => void;
@@ -49,144 +53,138 @@ export default function JobPostForm({ onSubmit, verifiedUser, onCancel }: JobPos
     };
 
     return (
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 space-y-4">
-            <h2 className="text-2xl font-bold text-orange-700 mb-4">Post a Dharmic Job</h2>
-
-            <div className="bg-green-50 border border-green-200 rounded-md p-3 mb-4">
-                <p className="text-sm text-green-800">
-                    ✓ Verified as: <span className="font-medium">{verifiedUser.name}</span> ({verifiedUser.email})
+        <form onSubmit={handleSubmit} className="rounded-3xl border border-orange-100 bg-white/95 p-6 sm:p-8 shadow-xl space-y-6">
+            <div>
+                <h2 className="text-3xl font-bold text-slate-900">Post a Dharmic Job</h2>
+                <p className="text-muted-foreground mt-2 text-sm">
+                    Share opportunities with the community in just a few quick steps.
                 </p>
             </div>
 
-            <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
-                    Job Title *
-                </label>
-                <input
-                    type="text"
-                    id="title"
-                    name="title"
-                    required
-                    value={formData.title}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    placeholder="e.g., Temple Priest, Sanskrit Teacher"
-                />
+            <div className="rounded-2xl border border-green-200 bg-green-50/80 p-4">
+                <p className="text-sm text-green-800">
+                    ✓ Verified as <span className="font-semibold">{verifiedUser.name}</span> ({verifiedUser.email})
+                </p>
             </div>
 
-            <div>
-                <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
-                    Company/Organization *
-                </label>
-                <input
-                    type="text"
-                    id="company"
-                    name="company"
-                    required
-                    value={formData.company}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    placeholder="e.g., Shri Ram Mandir Trust"
-                />
+            <div className="grid gap-5 sm:grid-cols-2">
+                <div className="space-y-2">
+                    <Label htmlFor="title">Job Title *</Label>
+                    <Input
+                        type="text"
+                        id="title"
+                        name="title"
+                        required
+                        value={formData.title}
+                        onChange={handleChange}
+                        placeholder="e.g., Temple Priest"
+                        className="h-12"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="company">Company/Organization *</Label>
+                    <Input
+                        type="text"
+                        id="company"
+                        name="company"
+                        required
+                        value={formData.company}
+                        onChange={handleChange}
+                        placeholder="e.g., Shri Ram Mandir Trust"
+                        className="h-12"
+                    />
+                </div>
             </div>
 
-            <div>
-                <label htmlFor="state" className="block text-sm font-medium text-gray-700 mb-1">
-                    State *
-                </label>
-                <select
-                    id="state"
-                    name="state"
-                    required
-                    value={formData.state}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                >
-                    <option value="">Select State</option>
-                    {INDIAN_STATES.map((state) => (
-                        <option key={state} value={state}>
-                            {state}
-                        </option>
-                    ))}
-                </select>
+            <div className="grid gap-5 sm:grid-cols-2">
+                <div className="space-y-2">
+                    <Label htmlFor="state">State *</Label>
+                    <select
+                        id="state"
+                        name="state"
+                        required
+                        value={formData.state}
+                        onChange={handleChange}
+                        className="h-12 w-full rounded-2xl border border-input bg-white px-4 text-base shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                    >
+                        <option value="">Select State</option>
+                        {INDIAN_STATES.map((state) => (
+                            <option key={state} value={state}>
+                                {state}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="contactPhone">Contact Phone *</Label>
+                    <Input
+                        type="tel"
+                        id="contactPhone"
+                        name="contactPhone"
+                        required
+                        value={formData.contactPhone}
+                        onChange={handleChange}
+                        placeholder="+91 XXXXXXXXXX"
+                        className="h-12"
+                    />
+                </div>
             </div>
 
-            <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
-                    Job Description *
-                </label>
-                <textarea
+            <div className="grid gap-5 sm:grid-cols-2">
+                <div className="space-y-2">
+                    <Label htmlFor="contactEmail">Contact Email *</Label>
+                    <Input
+                        type="email"
+                        id="contactEmail"
+                        name="contactEmail"
+                        required
+                        value={formData.contactEmail}
+                        onChange={handleChange}
+                        placeholder="contact@example.com"
+                        className="h-12"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="isFamilyEnterprise">Enterprise Type</Label>
+                    <button
+                        type="button"
+                        onClick={() => setFormData((prev) => ({ ...prev, isFamilyEnterprise: !prev.isFamilyEnterprise }))}
+                        className={`h-12 w-full rounded-2xl border px-4 text-left font-medium transition-colors ${formData.isFamilyEnterprise ? 'border-orange-400 bg-orange-50 text-orange-900' : 'border-input text-muted-foreground hover:border-orange-200'}`}
+                    >
+                        {formData.isFamilyEnterprise ? 'Family Enterprise' : 'Not a Family Enterprise'}
+                    </button>
+                </div>
+            </div>
+
+            <div className="space-y-2">
+                <Label htmlFor="description">Job Description *</Label>
+                <Textarea
                     id="description"
                     name="description"
                     required
                     value={formData.description}
                     onChange={handleChange}
-                    rows={5}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    placeholder="Describe the job requirements, responsibilities, and qualifications..."
+                    rows={6}
+                    placeholder="Describe the role, responsibilities, and qualifications."
+                    className="min-h-40"
                 />
             </div>
 
-            <div className="flex items-center">
-                <input
-                    type="checkbox"
-                    id="isFamilyEnterprise"
-                    name="isFamilyEnterprise"
-                    checked={formData.isFamilyEnterprise}
-                    onChange={handleChange}
-                    className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-300 rounded"
-                />
-                <label htmlFor="isFamilyEnterprise" className="ml-2 block text-sm text-gray-700">
-                    This is a Family Enterprise
-                </label>
-            </div>
-
-            <div>
-                <label htmlFor="contactEmail" className="block text-sm font-medium text-gray-700 mb-1">
-                    Contact Email *
-                </label>
-                <input
-                    type="email"
-                    id="contactEmail"
-                    name="contactEmail"
-                    required
-                    value={formData.contactEmail}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    placeholder="contact@example.com"
-                />
-            </div>
-
-            <div>
-                <label htmlFor="contactPhone" className="block text-sm font-medium text-gray-700 mb-1">
-                    Contact Phone *
-                </label>
-                <input
-                    type="tel"
-                    id="contactPhone"
-                    name="contactPhone"
-                    required
-                    value={formData.contactPhone}
-                    onChange={handleChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    placeholder="+91 XXXXXXXXXX"
-                />
-            </div>
-
-            <div className="flex gap-3">
-                <button
+            <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <Button
                     type="button"
+                    variant="outline"
                     onClick={onCancel}
-                    className="flex-1 bg-gray-200 text-gray-700 py-3 px-4 rounded-md hover:bg-gray-300 transition-colors font-medium"
+                    className="flex-1"
                 >
                     Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                     type="submit"
-                    className="flex-1 bg-orange-600 text-white py-3 px-4 rounded-md hover:bg-orange-700 transition-colors font-medium"
+                    className="flex-1"
                 >
                     Post Job
-                </button>
+                </Button>
             </div>
         </form>
     );

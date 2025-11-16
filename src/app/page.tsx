@@ -1,21 +1,88 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import JobListingsNew from "@/components/JobListingsNew";
 import VerificationModal from "@/components/VerificationModal";
 import JobPostModal from "@/components/JobPostModal";
-import LanguageSwitcher from "@/components/LanguageSwitcher";
+import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
+import JobFilterSidebar, { JobFilters, DEFAULT_JOB_FILTERS } from "@/components/JobFilterSidebar";
 import { Job, VerifiedUser, JobApplication } from "@/types";
 import { dummyJobs } from "@/data/dummyJobs";
-import { Button } from "@/components/ui/button";
 import { useLocale } from "@/contexts/LocaleContext";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Filter, Flower2 } from "lucide-react";
 
 export default function Home() {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const [jobs, setJobs] = useState<Job[]>(dummyJobs);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [verifiedUser, setVerifiedUser] = useState<VerifiedUser | null>(null);
   const [showPostModal, setShowPostModal] = useState(false);
+  const [filters, setFilters] = useState<JobFilters>({ ...DEFAULT_JOB_FILTERS });
+
+  const availableCities = useMemo(() => {
+    const uniqueCities = new Set<string>();
+    jobs.forEach((job) => uniqueCities.add(job.city));
+    return Array.from(uniqueCities).sort((a, b) => a.localeCompare(b));
+  }, [jobs]);
+
+  const getTranslated = (content: string | Record<string, string>): string => {
+    if (typeof content === "string") return content;
+    return content[locale] || content["en"] || Object.values(content)[0] || "";
+  };
+
+  // Filter jobs based on current filters
+  const filteredJobs = useMemo(() => {
+    return jobs.filter((job) => {
+      const title = getTranslated(job.title);
+      const description = getTranslated(job.description);
+      const lowerSearch = filters.searchTerm.toLowerCase();
+
+      const matchesSearch =
+        lowerSearch.length === 0 ||
+        title.toLowerCase().includes(lowerSearch) ||
+        job.company.toLowerCase().includes(lowerSearch) ||
+        description.toLowerCase().includes(lowerSearch) ||
+        job.city.toLowerCase().includes(lowerSearch) ||
+        job.state.toLowerCase().includes(lowerSearch);
+
+      // State filter
+      if (filters.state !== "all" && job.state !== filters.state) {
+        return false;
+      }
+
+      // City filter
+      if (filters.city !== "all" && job.city !== filters.city) {
+        return false;
+      }
+
+      // Job type filter
+      if (filters.jobType !== "all" && job.jobType !== filters.jobType) {
+        return false;
+      }
+
+      // Family enterprise filter
+      if (filters.showFamilyOnly && !job.isFamilyEnterprise) {
+        return false;
+      }
+
+      // Salary range filter
+      const jobMinSalary = job.salary.min;
+      const jobMaxSalary = job.salary.max;
+      if (jobMaxSalary < filters.salaryMin || jobMinSalary > filters.salaryMax) {
+        return false;
+      }
+
+      // Language filter
+      if (filters.languages.length > 0 && !filters.languages.some((language) => job.languages.includes(language))) {
+        return false;
+      }
+
+      return matchesSearch;
+    });
+  }, [jobs, filters, locale]);
 
   const handleVerification = (user: VerifiedUser) => {
     setVerifiedUser(user);
@@ -62,56 +129,78 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="bg-linear-to-r from-primary to-primary/90 text-primary-foreground shadow-lg">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex justify-between items-start mb-4">
-            <div className="flex-1"></div>
-            <LanguageSwitcher />
-          </div>
-          <div className="text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-2">
-              🕉️ {t('common.dharmic_jobs')}
-            </h1>
-            <p className="text-primary-foreground/90 text-lg">
-              Connecting Hindu Community Through Dharmic Employment
-            </p>
-            <p className="text-primary-foreground/80 text-sm mt-2">
-              Supporting Family Enterprises & State-wise Job Opportunities
-            </p>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col">
+      {/* Navbar */}
+      <Navbar onPostJobClick={handlePostJobClick} />
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Post Job Button */}
-        <div className="mb-8 text-center">
-          <Button
-            onClick={handlePostJobClick}
-            size="lg"
-            className="text-lg px-8"
-          >
-            📝 {t('common.post_job')}
-          </Button>
+      {/* Hero Section */}
+      <section className="relative isolate overflow-hidden text-white animate-fade-in">
+        <div
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ backgroundImage: "url('https://varanasiallcab.com/wp-content/uploads/2025/09/Ganga-Aarti-Varanasi-From-Boat.jpg')" }}
+        />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(0,0,0,0.85),rgba(0,0,0,0.35))]" />
+        <div className="relative z-10 mx-auto w-full max-w-5xl px-6 sm:px-8 lg:px-10 py-20 md:py-24 text-center space-y-6">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-6 flex flex-col items-center justify-center gap-4 animate-fade-in-up">
+            <Flower2 className="h-14 w-14 md:h-16 md:w-16 text-orange-200" />
+            {t('common.dharmic_jobs')}
+          </h1>
+          <p className="text-xl md:text-2xl text-white/95 font-medium animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
+            Connecting Hindu Community Through Dharmic Employment
+          </p>
+          <p className="text-base md:text-lg text-white/85 max-w-2xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            Supporting Family Enterprises & State-wise Job Opportunities Across India
+          </p>
         </div>
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-linear-to-b from-transparent to-background" aria-hidden />
+      </section>
 
-        {/* Job Listings */}
-        <JobListingsNew jobs={jobs} onJobApply={handleJobApply} />
+      {/* Main Content with Sidebar */}
+      <main className="flex-1 w-full animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-12">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-10">
+              {/* Sidebar - Hidden on mobile, shown on large screens */}
+              <aside className="hidden lg:block animate-slide-in-left">
+                <JobFilterSidebar
+                  filters={filters}
+                  onFilterChange={setFilters}
+                  jobCount={filteredJobs.length}
+                  availableCities={availableCities}
+                />
+              </aside>
+
+              {/* Job Listings */}
+              <div className="lg:col-span-3">
+                {/* Mobile Filter Button - Shows sheet with filters */}
+                <div className="lg:hidden mb-6">
+                  <Sheet>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" className="w-full h-12 text-base">
+                        <Filter className="h-5 w-5 mr-2" />
+                        Filters ({filteredJobs.length} jobs)
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent side="left" className="w-full max-w-sm overflow-y-auto px-0">
+                      <div className="mt-8">
+                        <JobFilterSidebar
+                          filters={filters}
+                          onFilterChange={setFilters}
+                          jobCount={filteredJobs.length}
+                          availableCities={availableCities}
+                        />
+                      </div>
+                    </SheetContent>
+                  </Sheet>
+                </div>
+
+                <JobListingsNew jobs={filteredJobs} onJobApply={handleJobApply} />
+              </div>
+            </div>
+        </div>
       </main>
 
       {/* Footer */}
-      <footer className="bg-primary/95 text-primary-foreground py-6 mt-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <p className="text-primary-foreground/90">
-            A platform dedicated to connecting Hindu community members through dharmic employment opportunities
-          </p>
-          <p className="text-primary-foreground/80 text-sm mt-2">
-            🙏 Serving the Dharmic Community
-          </p>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Modals */}
       <VerificationModal

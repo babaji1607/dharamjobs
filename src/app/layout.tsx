@@ -24,12 +24,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="hi">
+    <html lang="hi" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <LocaleProvider>
-          {children}
+          <div className="flex min-h-screen flex-col">
+            {children}
+          </div>
         </LocaleProvider>
       </body>
     </html>

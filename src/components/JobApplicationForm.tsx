@@ -2,6 +2,10 @@
 
 import { useState } from "react";
 import { JobApplication } from "@/types";
+import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 
 interface JobApplicationFormProps {
     jobTitle: string;
@@ -31,91 +35,87 @@ export default function JobApplicationForm({ jobTitle, onSubmit, onCancel }: Job
     };
 
     return (
-        <div className="bg-white rounded-lg shadow-lg p-6 border-2 border-orange-300">
-            <h3 className="text-xl font-bold text-orange-700 mb-2">Apply for: {jobTitle}</h3>
-            <p className="text-gray-600 mb-4 text-sm">
-                Fill in your details to express interest in this job opportunity.
-            </p>
+        <div className="rounded-3xl border border-orange-100 bg-white/95 p-6 sm:p-8 shadow-xl space-y-4">
+            <div>
+                <p className="text-sm uppercase tracking-wide text-orange-500 font-semibold">Apply now</p>
+                <h3 className="text-2xl font-bold text-slate-900">{jobTitle}</h3>
+                <p className="text-sm text-muted-foreground mt-2">
+                    Fill in your details to express interest in this opportunity.
+                </p>
+            </div>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                    <label htmlFor="applicantName" className="block text-sm font-medium text-gray-700 mb-1">
-                        Your Name *
-                    </label>
-                    <input
+            <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="space-y-2">
+                    <Label htmlFor="applicantName">Your Name *</Label>
+                    <Input
                         type="text"
                         id="applicantName"
                         name="applicantName"
                         required
                         value={formData.applicantName}
                         onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                         placeholder="Your full name"
+                        className="h-12"
                     />
                 </div>
 
-                <div>
-                    <label htmlFor="applicantEmail" className="block text-sm font-medium text-gray-700 mb-1">
-                        Email Address *
-                    </label>
-                    <input
+                <div className="space-y-2">
+                    <Label htmlFor="applicantEmail">Email Address *</Label>
+                    <Input
                         type="email"
                         id="applicantEmail"
                         name="applicantEmail"
                         required
                         value={formData.applicantEmail}
                         onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                         placeholder="your.email@example.com"
+                        className="h-12"
                     />
                 </div>
 
-                <div>
-                    <label htmlFor="applicantPhone" className="block text-sm font-medium text-gray-700 mb-1">
-                        Phone Number *
-                    </label>
-                    <input
+                <div className="space-y-2">
+                    <Label htmlFor="applicantPhone">Phone Number *</Label>
+                    <Input
                         type="tel"
                         id="applicantPhone"
                         name="applicantPhone"
                         required
                         value={formData.applicantPhone}
                         onChange={handleChange}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
                         placeholder="+91 XXXXXXXXXX"
+                        className="h-12"
                     />
                 </div>
 
-                <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
-                        Cover Message *
-                    </label>
-                    <textarea
+                <div className="space-y-2">
+                    <Label htmlFor="message">Cover Message *</Label>
+                    <Textarea
                         id="message"
                         name="message"
                         required
                         value={formData.message}
                         onChange={handleChange}
                         rows={4}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-orange-500"
-                        placeholder="Tell the employer why you're interested in this position..."
+                        placeholder="Tell the employer why you're excited about this position..."
+                        className="min-h-[140px]"
                     />
                 </div>
 
-                <div className="flex gap-3">
-                    <button
+                <div className="flex flex-col sm:flex-row gap-3 pt-3">
+                    <Button
                         type="button"
+                        variant="outline"
                         onClick={onCancel}
-                        className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition-colors font-medium"
+                        className="flex-1"
                     >
                         Cancel
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                         type="submit"
-                        className="flex-1 bg-orange-600 text-white py-2 px-4 rounded-md hover:bg-orange-700 transition-colors font-medium"
+                        className="flex-1"
                     >
                         Submit Application
-                    </button>
+                    </Button>
                 </div>
             </form>
         </div>
