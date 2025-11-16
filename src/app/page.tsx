@@ -159,43 +159,43 @@ export default function Home() {
       <main className="flex-1 w-full animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
         <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-10 py-12">
           <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-10">
-              {/* Sidebar - Hidden on mobile, shown on large screens */}
-              <aside className="hidden lg:block animate-slide-in-left">
-                <JobFilterSidebar
-                  filters={filters}
-                  onFilterChange={setFilters}
-                  jobCount={filteredJobs.length}
-                  availableCities={availableCities}
-                />
-              </aside>
+            {/* Sidebar - Hidden on mobile, shown on large screens */}
+            <aside className="hidden lg:block animate-slide-in-left">
+              <JobFilterSidebar
+                filters={filters}
+                onFilterChange={setFilters}
+                jobCount={filteredJobs.length}
+                availableCities={availableCities}
+              />
+            </aside>
 
-              {/* Job Listings */}
-              <div className="lg:col-span-3">
-                {/* Mobile Filter Button - Shows sheet with filters */}
-                <div className="lg:hidden mb-6">
-                  <Sheet>
-                    <SheetTrigger asChild>
-                      <Button variant="outline" className="w-full h-12 text-base">
-                        <Filter className="h-5 w-5 mr-2" />
-                        Filters ({filteredJobs.length} jobs)
-                      </Button>
-                    </SheetTrigger>
-                    <SheetContent side="left" className="w-full max-w-sm overflow-y-auto px-0">
-                      <div className="mt-8">
-                        <JobFilterSidebar
-                          filters={filters}
-                          onFilterChange={setFilters}
-                          jobCount={filteredJobs.length}
-                          availableCities={availableCities}
-                        />
-                      </div>
-                    </SheetContent>
-                  </Sheet>
-                </div>
-
-                <JobListingsNew jobs={filteredJobs} onJobApply={handleJobApply} />
+            {/* Job Listings */}
+            <div className="lg:col-span-3">
+              {/* Mobile Filter Button - Shows sheet with filters */}
+              <div className="lg:hidden mb-6">
+                <Sheet>
+                  <SheetTrigger asChild>
+                    <Button variant="outline" className="w-full h-12 text-base">
+                      <Filter className="h-5 w-5 mr-2" />
+                      Filters ({filteredJobs.length} jobs)
+                    </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-full max-w-sm overflow-y-auto px-0">
+                    <div className="mt-8">
+                      <JobFilterSidebar
+                        filters={filters}
+                        onFilterChange={setFilters}
+                        jobCount={filteredJobs.length}
+                        availableCities={availableCities}
+                      />
+                    </div>
+                  </SheetContent>
+                </Sheet>
               </div>
+
+              <JobListingsNew jobs={filteredJobs} onJobApply={handleJobApply} />
             </div>
+          </div>
         </div>
       </main>
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Job, INDIAN_STATES, VerifiedUser } from "@/types";
+import { Job, INDIAN_STATES, VerifiedUser, JOB_TYPES, JobType, LANGUAGES, Language } from "@/types";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,6 +19,11 @@ export default function JobPostForm({ onSubmit, verifiedUser, onCancel }: JobPos
         company: "",
         description: "",
         state: "",
+        city: "",
+        jobType: "" as JobType | "",
+        salaryMin: "",
+        salaryMax: "",
+        languages: [] as Language[],
         isFamilyEnterprise: false,
         contactEmail: "",
         contactPhone: "",
@@ -27,7 +32,22 @@ export default function JobPostForm({ onSubmit, verifiedUser, onCancel }: JobPos
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         onSubmit({
-            ...formData,
+            title: formData.title,
+            company: formData.company,
+            description: formData.description,
+            state: formData.state,
+            city: formData.city,
+            jobType: (formData.jobType || JOB_TYPES[0]) as JobType,
+            salary: {
+                min: parseInt(formData.salaryMin) || 0,
+                max: parseInt(formData.salaryMax) || 0,
+                currency: "INR",
+                period: "monthly",
+            },
+            languages: formData.languages,
+            isFamilyEnterprise: formData.isFamilyEnterprise,
+            contactEmail: formData.contactEmail,
+            contactPhone: formData.contactPhone,
             postedBy: verifiedUser,
         });
         // Reset form
@@ -36,6 +56,11 @@ export default function JobPostForm({ onSubmit, verifiedUser, onCancel }: JobPos
             company: "",
             description: "",
             state: "",
+            city: "",
+            jobType: "",
+            salaryMin: "",
+            salaryMax: "",
+            languages: [],
             isFamilyEnterprise: false,
             contactEmail: "",
             contactPhone: "",
@@ -49,6 +74,15 @@ export default function JobPostForm({ onSubmit, verifiedUser, onCancel }: JobPos
         setFormData((prev) => ({
             ...prev,
             [name]: type === "checkbox" ? (e.target as HTMLInputElement).checked : value,
+        }));
+    };
+
+    const toggleLanguage = (language: Language) => {
+        setFormData((prev) => ({
+            ...prev,
+            languages: prev.languages.includes(language)
+                ? prev.languages.filter((lang) => lang !== language)
+                : [...prev.languages, language],
         }));
     };
 
@@ -116,6 +150,40 @@ export default function JobPostForm({ onSubmit, verifiedUser, onCancel }: JobPos
                     </select>
                 </div>
                 <div className="space-y-2">
+                    <Label htmlFor="city">City *</Label>
+                    <Input
+                        type="text"
+                        id="city"
+                        name="city"
+                        required
+                        value={formData.city}
+                        onChange={handleChange}
+                        placeholder="e.g., Ayodhya"
+                        className="h-12"
+                    />
+                </div>
+            </div>
+
+            <div className="grid gap-5 sm:grid-cols-2">
+                <div className="space-y-2">
+                    <Label htmlFor="jobType">Job Type *</Label>
+                    <select
+                        id="jobType"
+                        name="jobType"
+                        required
+                        value={formData.jobType}
+                        onChange={handleChange}
+                        className="h-12 w-full rounded-2xl border border-input bg-white px-4 text-base shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+                    >
+                        <option value="">Select job type</option>
+                        {JOB_TYPES.map((type) => (
+                            <option key={type} value={type}>
+                                {type}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+                <div className="space-y-2">
                     <Label htmlFor="contactPhone">Contact Phone *</Label>
                     <Input
                         type="tel"
@@ -156,6 +224,56 @@ export default function JobPostForm({ onSubmit, verifiedUser, onCancel }: JobPos
                 </div>
             </div>
 
+            <div className="grid gap-5 sm:grid-cols-2">
+                <div className="space-y-2">
+                    <Label htmlFor="salaryMin">Minimum Salary (₹)*</Label>
+                    <Input
+                        type="number"
+                        id="salaryMin"
+                        name="salaryMin"
+                        required
+                        value={formData.salaryMin}
+                        onChange={handleChange}
+                        placeholder="e.g., 15000"
+                        className="h-12"
+                    />
+                </div>
+                <div className="space-y-2">
+                    <Label htmlFor="salaryMax">Maximum Salary (₹)*</Label>
+                    <Input
+                        type="number"
+                        id="salaryMax"
+                        name="salaryMax"
+                        required
+                        value={formData.salaryMax}
+                        onChange={handleChange}
+                        placeholder="e.g., 30000"
+                        className="h-12"
+                    />
+                </div>
+            </div>
+
+            <div className="space-y-3">
+                <Label>Languages Required *</Label>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                    {LANGUAGES.map((language) => (
+                        <button
+                            type="button"
+                            key={language}
+                            onClick={() => toggleLanguage(language)}
+                            className={`rounded-2xl border px-3 py-2 text-sm font-medium transition-colors ${formData.languages.includes(language)
+                                ? 'border-orange-400 bg-orange-50 text-orange-900'
+                                : 'border-input text-muted-foreground hover:border-orange-200'}`}
+                        >
+                            {language}
+                        </button>
+                    ))}
+                </div>
+                {formData.languages.length === 0 && (
+                    <p className="text-xs text-muted-foreground">Select at least one language.</p>
+                )}
+            </div>
+
             <div className="space-y-2">
                 <Label htmlFor="description">Job Description *</Label>
                 <Textarea
@@ -182,6 +300,7 @@ export default function JobPostForm({ onSubmit, verifiedUser, onCancel }: JobPos
                 <Button
                     type="submit"
                     className="flex-1"
+                    disabled={formData.languages.length === 0}
                 >
                     Post Job
                 </Button>

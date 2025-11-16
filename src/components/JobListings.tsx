@@ -3,6 +3,7 @@
 import { Job, INDIAN_STATES, JobApplication } from "@/types";
 import { useState } from "react";
 import JobApplicationForm from "./JobApplicationForm";
+import { useLocale } from "@/contexts/LocaleContext";
 
 interface JobListingsProps {
     jobs: Job[];
@@ -10,9 +11,15 @@ interface JobListingsProps {
 }
 
 export default function JobListings({ jobs, onJobApply }: JobListingsProps) {
+    const { locale } = useLocale();
     const [selectedState, setSelectedState] = useState<string>("all");
     const [showFamilyOnly, setShowFamilyOnly] = useState<boolean>(false);
     const [applyingToJobId, setApplyingToJobId] = useState<string | null>(null);
+
+    const getTranslated = (content: string | Record<string, string>): string => {
+        if (typeof content === "string") return content;
+        return content[locale] || content["en"] || Object.values(content)[0] || "";
+    };
 
     const filteredJobs = jobs.filter((job) => {
         const stateMatch = selectedState === "all" || job.state === selectedState;
@@ -90,7 +97,7 @@ export default function JobListings({ jobs, onJobApply }: JobListingsProps) {
                             <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
                                 <div className="flex-1">
                                     <div className="flex items-start gap-3 mb-2">
-                                        <h3 className="text-xl font-bold text-gray-900">{job.title}</h3>
+                                        <h3 className="text-xl font-bold text-gray-900">{getTranslated(job.title)}</h3>
                                         {job.isFamilyEnterprise && (
                                             <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
                                                 Family Enterprise
@@ -116,7 +123,7 @@ export default function JobListings({ jobs, onJobApply }: JobListingsProps) {
                                         </span>
                                     </div>
 
-                                    <p className="text-gray-700 mb-4 whitespace-pre-line">{job.description}</p>
+                                    <p className="text-gray-700 mb-4 whitespace-pre-line">{getTranslated(job.description)}</p>
 
                                     <div className="border-t pt-4 mt-4">
                                         <p className="text-sm font-semibold text-gray-700 mb-2">Contact Information:</p>
@@ -163,7 +170,7 @@ export default function JobListings({ jobs, onJobApply }: JobListingsProps) {
                                     {applyingToJobId === job.id && (
                                         <div className="mt-4">
                                             <JobApplicationForm
-                                                jobTitle={job.title}
+                                                jobTitle={getTranslated(job.title)}
                                                 onSubmit={(application) => handleApplicationSubmit(job.id, application)}
                                                 onCancel={() => setApplyingToJobId(null)}
                                             />
