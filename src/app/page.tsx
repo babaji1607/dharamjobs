@@ -10,16 +10,20 @@ import JobFilterSidebar, { JobFilters, DEFAULT_JOB_FILTERS } from "@/components/
 import { Job, VerifiedUser, JobApplication } from "@/types";
 import { dummyJobs } from "@/data/dummyJobs";
 import { useLocale } from "@/contexts/LocaleContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { AuthModal } from "@/components/AuthModal";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Filter, Flower2 } from "lucide-react";
 
 export default function Home() {
   const { t, locale } = useLocale();
+  const { session } = useAuth();
   const [jobs, setJobs] = useState<Job[]>(dummyJobs);
   const [showVerificationModal, setShowVerificationModal] = useState(false);
   const [verifiedUser, setVerifiedUser] = useState<VerifiedUser | null>(null);
   const [showPostModal, setShowPostModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [filters, setFilters] = useState<JobFilters>({ ...DEFAULT_JOB_FILTERS });
 
   const availableCities = useMemo(() => {
@@ -125,6 +129,11 @@ export default function Home() {
   };
 
   const handlePostJobClick = () => {
+    // Check if user is authenticated
+    if (!session) {
+      setShowAuthModal(true);
+      return;
+    }
     setShowVerificationModal(true);
   };
 
@@ -203,6 +212,8 @@ export default function Home() {
       <Footer />
 
       {/* Modals */}
+      <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
+
       <VerificationModal
         open={showVerificationModal}
         onOpenChange={setShowVerificationModal}

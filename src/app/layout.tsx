@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { LocaleProvider } from "@/contexts/LocaleContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import { Toaster } from "@/components/ui/toaster";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,11 +30,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <LocaleProvider>
-          <div className="flex min-h-screen flex-col">
-            {children}
-          </div>
-        </LocaleProvider>
+        <AuthProvider>
+          <LocaleProvider>
+            <div className="flex min-h-screen flex-col">
+              {children}
+            </div>
+            <Toaster />
+          </LocaleProvider>
+        </AuthProvider>
       </body>
     </html>
   );

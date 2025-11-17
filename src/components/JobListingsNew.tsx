@@ -3,12 +3,14 @@
 import { Job, JobApplication } from "@/types";
 import { useMemo, useState } from "react";
 import JobApplicationModal from "./JobApplicationModal";
+import { AuthModal } from "./AuthModal";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { MapPin, Calendar, Mail, Phone, Building2, Users, IndianRupee, Briefcase, Languages } from "lucide-react";
 import { useLocale } from "@/contexts/LocaleContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface JobListingsProps {
     jobs: Job[];
@@ -17,7 +19,9 @@ interface JobListingsProps {
 
 export default function JobListingsNew({ jobs, onJobApply }: JobListingsProps) {
     const { t, locale } = useLocale();
+    const { session } = useAuth();
     const [applyingToJob, setApplyingToJob] = useState<Job | null>(null);
+    const [showAuthModal, setShowAuthModal] = useState(false);
     const salaryFormatter = useMemo(() => new Intl.NumberFormat('en-IN'), []);
 
     const getTranslated = (content: string | Record<string, string>): string => {
@@ -42,6 +46,15 @@ export default function JobListingsNew({ jobs, onJobApply }: JobListingsProps) {
             onJobApply(applyingToJob.id, application);
             setApplyingToJob(null);
         }
+    };
+
+    const handleApplyClick = (job: Job) => {
+        // Check if user is authenticated
+        if (!session) {
+            setShowAuthModal(true);
+            return;
+        }
+        setApplyingToJob(job);
     };
 
     return (
@@ -154,7 +167,7 @@ export default function JobListingsNew({ jobs, onJobApply }: JobListingsProps) {
 
                             <CardFooter>
                                 <Button
-                                    onClick={() => setApplyingToJob(job)}
+                                    onClick={() => handleApplyClick(job)}
                                     className="w-full"
                                     size="lg"
                                 >
@@ -166,7 +179,9 @@ export default function JobListingsNew({ jobs, onJobApply }: JobListingsProps) {
                 )}
             </div>
 
-            {/* Application Modal */}
+            {/* Modals */}
+            <AuthModal open={showAuthModal} onOpenChange={setShowAuthModal} />
+
             {applyingToJob && (
                 <JobApplicationModal
                     open={!!applyingToJob}
